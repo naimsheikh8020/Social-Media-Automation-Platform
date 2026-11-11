@@ -1,7 +1,17 @@
 
-const Sidebar = () => {
+
+const Sidebar = ({isOpen, setIsOpen}: {isOpen: boolean, setIsOpen: (value: boolean) => void}) => {
   return (
-    <div>Sidebar</div>
+    <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col h-full transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'} `}>
+      {/* Logo */}
+      <div className="p-6 pb-4">
+        <div className="text-xl tracking-tight text-slate-800 flex items-center gap-3">
+          <img src="/logo.svg" alt="Logo" className="h-8 w-8" />
+          <span >Scheduler</span>
+        </div>
+      </div>
+      
+    </div>
   )
 }
 
