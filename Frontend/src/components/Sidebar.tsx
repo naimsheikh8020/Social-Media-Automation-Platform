@@ -1,11 +1,14 @@
 import { CalendarDaysIcon, LayoutDashboardIcon, LogOut, UserIcon, Wand2Icon } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 
 const Sidebar = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (value: boolean) => void }) => {
+  const navigate = useNavigate();
+
   const { logout, user } = {
     logout: () => {
-      window.location.href = "/"
+      navigate("/");
     },
     user: {
       name: "John Doe",
@@ -73,7 +76,7 @@ const Sidebar = ({ isOpen, setIsOpen }: { isOpen: boolean, setIsOpen: (value: bo
         </div>
 
         <button onClick={logout} className="mt-1 flex items-center gap-2 px-3 py-2 w-full rounded text-sm text-slate-500 hover:bg-red-50 hover:text-red-500 transition-all duration-150">
-          <LogOut className="size-4"/>
+          <LogOut className="size-4" />
           sign out
         </button>
 
