@@ -1,8 +1,8 @@
-import { CheckCircleIcon, ClockIcon, Share2Icon, TrendingUpIcon } from "lucide-react"
+import { ActivityIcon, CheckCircleIcon, ClockIcon, Share2Icon, TrendingUpIcon } from "lucide-react"
 import { useState } from "react"
 
 const Dashboard = () => {
-  const [stats, setStats] = useState({scheduled:0, published:0, connectedAccounts:0})
+  const [stats, setStats] = useState({ scheduled: 0, published: 0, connectedAccounts: 0 })
   const [activities, setActivities] = useState<any[]>([])
   const statCards = [
     {
@@ -48,7 +48,23 @@ const Dashboard = () => {
           </div>
         ))}
       </div>
-      
+      {/* Activity Feed */}
+      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+          <h2>Recent Activity </h2>
+          <span>{activities.length} events</span>
+        </div>
+        {activities.length === 0 ? (<div className="flex flex-col items-center justify-center py-16 px-6">
+          <div className="size12 bg-slate-100 rounded-xl flex items-center justify-center mb-3">
+            <ActivityIcon className="size-6 text-slate-400 m-2" />
+          </div>
+          <p className="text-sm text-slate-500">No activity yet</p>
+          <p className="text-sm text-slate-500">Connect accounts and schedule posts to see events here.</p>
+        </div>) :
+          (<div></div>)}
+      </div>
+
     </div>
   )
 }
