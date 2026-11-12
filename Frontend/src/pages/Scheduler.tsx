@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { dummyPostsData, PLATFORMS } from "../assets/assets";
 import type { Post } from "../types/post";
-import { XIcon } from "lucide-react";
+import { CalendarIcon, XIcon } from "lucide-react";
 
 const Scheduler = () => {
   const [posts, setPosts] = useState<Post[]>(dummyPostsData);
@@ -94,6 +94,14 @@ const Scheduler = () => {
             </div>
 
             {/* Date and Time */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-slate-500 uppercase mb-2">Date</label>
+                <div className="relative">
+                  <CalendarIcon/>
+                </div>
+              </div>
+            </div>
 
             {/* Submit */}
 
