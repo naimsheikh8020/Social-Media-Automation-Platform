@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { dummyPostsData, PLATFORMS } from "../assets/assets";
-import { ArrowRightIcon, CalendarIcon, ClockIcon, XIcon } from "lucide-react";
+import { ArrowRightIcon, CalendarDaysIcon, CalendarIcon, ClockIcon, SendIcon, XIcon } from "lucide-react";
 import { type Post } from '../types/post';
 
 const Scheduler = () => {
@@ -11,6 +11,7 @@ const Scheduler = () => {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [expandedPosts, setExpandedPosts] = useState<string[]>([]);
 
   const scheduled = posts.filter((p) => p.status === "scheduled");
   const published = posts.filter((p) => p.status === "published");
@@ -139,6 +140,216 @@ const Scheduler = () => {
       </div>
 
       {/* Queue Panels */}
+      <div className="flex-1 flex flex-col gap-6 min-w-0">
+        {/* Upcomming Post */}
+
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+          {/* Header */}
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+            <CalendarDaysIcon className="size-4 text-slate-500" />
+
+            <h3 className="text-sm font-semibold text-slate-800">
+              Upcoming
+            </h3>
+
+            <span className="ml-auto text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+              {scheduled.length}
+            </span>
+          </div>
+
+          {/* Posts */}
+          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+            {scheduled.length === 0 ? (
+              <div className="py-12 text-center">
+                <CalendarDaysIcon className="size-8 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-slate-600">
+                  No posts scheduled yet
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Your upcoming posts will appear here.
+                </p>
+              </div>
+            ) : (
+              scheduled.map((post) => (
+                <div
+                  key={post._id}
+                  className="p-5 hover:bg-slate-50/70 transition-colors"
+                >
+                  {/* Top Section */}
+                  <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+
+                    <div className="flex items-center gap-2">
+                      {post.platforms.map((pl: string) => {
+                        const meta = PLATFORMS.find((p) => p.id === pl);
+
+                        return meta ? (
+                          <div
+                            key={pl}
+                            title={meta.name}
+                            className="size-9 rounded-lg bg-slate-100 flex items-center justify-center"
+                          >
+                            <meta.icon className="size-4 text-slate-600" />
+                          </div>
+                        ) : null;
+                      })}
+
+                      <span className="text-xs font-medium text-slate-600 ml-1">
+                        {post.platforms.length} {post.platforms.length === 1 ? "Platform" : "Platforms"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {post.mediaType && (
+                        <span className="text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-md capitalize">
+                          {post.mediaType}
+                        </span>
+                      )}
+
+                      <span className="text-xs text-slate-500">
+                        {new Date(post.scheduledFor).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Post Content */}
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+                    <p
+                      className={`text-sm text-slate-600 leading-relaxed break-words ${expandedPosts.includes(post._id) ? "" : "line-clamp-3"
+                        }`}
+                    >
+                      {post.content}
+                    </p>
+
+                    {post.content.length > 180 && (
+                      <button
+                        onClick={() => {
+                          if (expandedPosts.includes(post._id)) {
+                            setExpandedPosts(
+                              expandedPosts.filter((id) => id !== post._id)
+                            );
+                          } else {
+                            setExpandedPosts([...expandedPosts, post._id]);
+                          }
+                        }}
+                        className="text-xs font-semibold text-red-500 hover:text-red-600 mt-2 transition-colors"
+                      >
+                        {expandedPosts.includes(post._id) ? "See less" : "See more"}
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Published Posts */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+          {/* Header */}
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
+            <SendIcon className="size-4 text-slate-500" />
+
+            <h3 className="text-sm font-semibold text-slate-800">
+              Published
+            </h3>
+
+            <span className="ml-auto text-xs font-semibold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+              {published.length}
+            </span>
+          </div>
+
+          {/* Posts */}
+          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+            {published.length === 0 ? (
+              <div className="py-12 text-center">
+                <SendIcon className="size-8 text-slate-300 mx-auto mb-3" />
+                <p className="text-sm font-medium text-slate-600">
+                  No published posts  yet
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Your upcoming posts will appear here.
+                </p>
+              </div>
+            ) : (
+              published.map((post) => (
+                <div
+                  key={post._id}
+                  className="p-5 hover:bg-slate-50/70 transition-colors"
+                >
+                  {/* Top Section */}
+                  <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+
+                    <div className="flex items-center gap-2">
+                      {post.platforms.map((pl: string) => {
+                        const meta = PLATFORMS.find((p) => p.id === pl);
+
+                        return meta ? (
+                          <div
+                            key={pl}
+                            title={meta.name}
+                            className="size-9 rounded-lg bg-slate-100 flex items-center justify-center"
+                          >
+                            <meta.icon className="size-4 text-slate-600" />
+                          </div>
+                        ) : null;
+                      })}
+
+                      <span className="text-xs font-medium text-slate-600 ml-1">
+                        {post.platforms.length} {post.platforms.length === 1 ? "Platform" : "Platforms"}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {post.mediaType && (
+                        <span className="text-xs font-medium bg-blue-50 text-blue-600 border border-blue-100 px-2.5 py-1 rounded-md capitalize">
+                          {post.mediaType}
+                        </span>
+                      )}
+
+                      <span className="text-xs text-slate-500">
+                        {new Date(post.updatedAt).toLocaleString()}
+                      </span>
+                      <span className="text-xs bg-emerald-50 text-emerald-700 border border-emerald-100 px-2 py-0.5 rounded-full">Published</span>
+                    </div>
+                  </div>
+
+                  {/* Post Content */}
+                  <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+                    <p
+                      className={`text-sm text-slate-600 leading-relaxed break-words ${expandedPosts.includes(post._id) ? "" : "line-clamp-3"
+                        }`}
+                    >
+                      {post.content}
+                    </p>
+
+                    {post.content.length > 180 && (
+                      <button
+                        onClick={() => {
+                          if (expandedPosts.includes(post._id)) {
+                            setExpandedPosts(
+                              expandedPosts.filter((id) => id !== post._id)
+                            );
+                          } else {
+                            setExpandedPosts([...expandedPosts, post._id]);
+                          }
+                        }}
+                        className="text-xs font-semibold text-red-500 hover:text-red-600 mt-2 transition-colors"
+                      >
+                        {expandedPosts.includes(post._id) ? "See less" : "See more"}
+                      </button>
+                    )}
+                  </div>
+
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+      </div>
     </div>);
 };
 

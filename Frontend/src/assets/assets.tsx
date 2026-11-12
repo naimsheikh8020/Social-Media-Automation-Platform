@@ -39,6 +39,7 @@ export const dummyPostsData: any = [
         createdAt: "2026-05-08T08:04:04.397Z",
         updatedAt: "2026-05-08T08:05:02.523Z",
     },
+    
     {
         _id: "6a02c5213be90e11e963460a",
         user: "69fd96aea59dd584d3587a1d",
@@ -137,6 +138,7 @@ export const dummyPostsData: any = [
         createdAt: "2026-05-19T12:09:24.729Z",
         updatedAt: "2026-05-19T12:09:24.729Z",
     },
+    
 ];
 
 export const dummyAccountsData = [

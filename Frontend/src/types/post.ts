@@ -8,4 +8,5 @@ export interface Post {
   status: "scheduled" | "published" | "failed";
   createdAt: string;
   updatedAt: string;
+  mediaType: "image" | "video" | null;
 }
