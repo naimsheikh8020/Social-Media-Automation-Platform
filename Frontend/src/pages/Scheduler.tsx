@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { dummyPostsData, PLATFORMS } from "../assets/assets";
-import type { Post } from "../types/post";
-import { CalendarIcon, ClockIcon, XIcon } from "lucide-react";
+import { ArrowRightIcon, CalendarIcon, ClockIcon, XIcon } from "lucide-react";
+import { type Post } from '../types/post';
 
 const Scheduler = () => {
   const [posts, setPosts] = useState<Post[]>(dummyPostsData);
@@ -27,9 +27,9 @@ const Scheduler = () => {
   const handleSchedule = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => { 
-      setLoading(false) 
-      setPosts((prev)=>[...prev, dummyPostsData[0]])
+    setTimeout(() => {
+      setLoading(false)
+      setPosts((prev) => [...prev, dummyPostsData[0]])
     })
   }
 
@@ -63,34 +63,34 @@ const Scheduler = () => {
             {/* Content  */}
             <div>
               <label className="block text-xs text-slate-500 uppercase mb-2">Content</label>
-              <textarea required rows={5} placeholder="What do you want to share today?" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm placeholder-slate-400 outline-none resize-none" value={content} onChange={(e)=> setContent(e.target.value)}/>
-                <div className={`text-right text-xs mt-1 font-medium ${content.length > 270 ? "text-red-500" : "text-slate-400" }`}>
-                  {content.length}/280
-                </div>
+              <textarea required rows={5} placeholder="What do you want to share today?" className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm placeholder-slate-400 outline-none resize-none" value={content} onChange={(e) => setContent(e.target.value)} />
+              <div className={`text-right text-xs mt-1 font-medium ${content.length > 270 ? "text-red-500" : "text-slate-400"}`}>
+                {content.length}/280
+              </div>
             </div>
             {/* Media Upload */}
             <div>
               <label className="block text-xs text-slate-500 uppercase mb-2">Media(optional)</label>
-              {mediaFile ? 
-              (
-                <div className="relative rounded-xl  overflow-hidden border border-slate-200 bg-slate-50">
-                  {
-                    mediaFile.type.startsWith("image/") ? <img src={URL.createObjectURL(mediaFile)} alt="preview" className="w-full h-40 object-cover"/> 
-                    : <video src={URL.createObjectURL(mediaFile)} className="w-full h-40 object-cover" controls/> 
-                  }
-                  <button type="button" onClick={()=> setMediaFile(null)} className="absolute top-2 right-2 size-7 bg-slate-900/60 hover:bg-slate-900/80 text-white rounded-full flex items-center justify-center transition-colors">
-                    <XIcon className="size-3.5"/>
-                  </button>
-                </div>
-              
-              )
-              
-              : 
-              
-              (<label className="flex items-center justify-center gap-2 p-5 py-10 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-all group">
-                <span className="text-sm text-slate-500 group-hover:text-red-600 transition-colors">Click to upload image or video</span>
-                <input type="file" accept="image/*, video/*" className="hidden" onChange={(e)=>e.target.files?.[0] && setMediaFile(e.target.files[0])}/>
-              </label>)}
+              {mediaFile ?
+                (
+                  <div className="relative rounded-xl  overflow-hidden border border-slate-200 bg-slate-50">
+                    {
+                      mediaFile.type.startsWith("image/") ? <img src={URL.createObjectURL(mediaFile)} alt="preview" className="w-full h-40 object-cover" />
+                        : <video src={URL.createObjectURL(mediaFile)} className="w-full h-40 object-cover" controls />
+                    }
+                    <button type="button" onClick={() => setMediaFile(null)} className="absolute top-2 right-2 size-7 bg-slate-900/60 hover:bg-slate-900/80 text-white rounded-full flex items-center justify-center transition-colors">
+                      <XIcon className="size-3.5" />
+                    </button>
+                  </div>
+
+                )
+
+                :
+
+                (<label className="flex items-center justify-center gap-2 p-5 py-10 border-2 border-dashed border-slate-200 rounded-xl cursor-pointer hover:border-red-300 hover:bg-red-50/30 transition-all group">
+                  <span className="text-sm text-slate-500 group-hover:text-red-600 transition-colors">Click to upload image or video</span>
+                  <input type="file" accept="image/*, video/*" className="hidden" onChange={(e) => e.target.files?.[0] && setMediaFile(e.target.files[0])} />
+                </label>)}
             </div>
 
             {/* Date and Time */}
@@ -99,23 +99,39 @@ const Scheduler = () => {
               <div>
                 <label className="block text-xs text-slate-500 uppercase mb-2">Date</label>
                 <div className="relative ">
-                  <CalendarIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
-                  <input type="date" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduledDate} onChange={(e)=>setScheduledDate(e.target.value)}/>
+                  <CalendarIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                  <input type="date" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduledDate} onChange={(e) => setScheduledDate(e.target.value)} />
                 </div>
               </div>
-              
+
               {/* Time */}
               <div>
                 <label className="block text-xs text-slate-500 uppercase mb-2">Time</label>
                 <div className="relative ">
-                  <ClockIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                  <ClockIcon className="size-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
 
-                  <input type="time" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduledTime} onChange={(e)=>setScheduledTime(e.target.value)}/>
+                  <input type="time" required className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-900 text-sm outline-none" value={scheduledTime} onChange={(e) => setScheduledTime(e.target.value)} />
                 </div>
               </div>
             </div>
 
             {/* Submit */}
+            <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 py-3.5 bg-red-500 hover:bg-red-600 transition-all text-white rounded-lg">
+              {loading ?
+
+                <>
+
+                  <div className="size-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Scheduling...
+                </>
+
+                :
+
+                <>
+                  Schedule Post
+                  <ArrowRightIcon className="size-4" />
+                </>}
+            </button>
 
           </form>
 
