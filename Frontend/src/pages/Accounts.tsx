@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { PLATFORMS, dummyAccountsData } from '../assets/assets';
 import { PlusIcon } from "lucide-react"
 import AccountList from "../components/AccountList"
+import PlatfromPickerModal from "../components/PlatfromPickerModal";
 
 const Accounts = () => {
   const [accounnts, setAccounts] = useState<any[]>([])
@@ -27,7 +28,7 @@ const Accounts = () => {
     }, 2000)
   }
 
-
+  
   const handelDisconnect = async (accountId: string) => {
     setAccounts(accounnts.filter((a) => a._id !== accountId))
   }
@@ -48,6 +49,9 @@ const Accounts = () => {
       </div>
 
       {/* Platform picker modal */}
+      {
+        showPlatformPicker && <PlatfromPickerModal connectedIds={connectedIds} connecting={connecting} onClose={()=> setShowPlatformPicker(false)} onConnect={handleConnect}/>
+      }
 
       {/* Connected Accounts List */}
       <AccountList accounts={accounnts} onDisconnect={handelDisconnect}/>
