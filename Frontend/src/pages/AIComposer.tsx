@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { dummyGenerationData } from "../assets/assets"
+import { ArrowRightIcon, Loader2Icon } from "lucide-react"
 
 const AIComposer = () => {
   const [prompt, setPrompt] = useState<string>('')
@@ -24,7 +25,16 @@ const AIComposer = () => {
     fetchGenerations()
   }, [])
 
+  const handelGenerate = async () => {
+    setLoading(true)
+    setTimeout(() => {
+      setLoading(false)
+    }, 2000)
+  }
+
+
   const tones = ["Professional", "Creative", "Funny", "Excited", "Casual", "Friendly", "Formal", "Humorous", "Inspirational", "Persuasive", "Empathetic", "Optimistic", "Confident"]
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-12 pb-20 animate-in fade-in duration-700">
@@ -55,30 +65,62 @@ const AIComposer = () => {
           {/* Bottom Toolbar */}
           <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between">
 
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-slate-400 hidden sm:block ">
               Describe your post idea
             </span>
 
-            {/* AI Image Toggle */}
-            <button
-              type="button"
-              onClick={() => setGenerateImage(!generateImage)}
-              aria-pressed={generateImage}
-              className="flex items-center gap-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              <span>AI Image</span>
-
-              <div
-                className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ${generateImage ? "bg-red-500" : "bg-slate-200"
-                  }`}
+            <div className="flex items-center gap-4 sm:justify-end justify-between w-full sm:w-auto">
+              {/* AI Image Toggle */}
+              <button
+                type="button"
+                onClick={() => setGenerateImage(!generateImage)}
+                aria-pressed={generateImage}
+                className="flex items-center gap-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
               >
-                <span
-                  className={`pointer-events-none absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${generateImage ? "translate-x-4" : "translate-x-0"
+                <span>AI Image</span>
+
+                <div
+                  className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ${generateImage ? "bg-red-500" : "bg-slate-200"
                     }`}
-                />
-              </div>
-            </button>
+                >
+                  <span
+                    className={`pointer-events-none absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${generateImage ? "translate-x-4" : "translate-x-0"
+                      }`}
+                  />
+                </div>
+              </button>
+
+              {/* Generate Button */}
+
+              <button onClick={handelGenerate} disabled={loading} className="bg-red-600 hover:bg-red-700 text-white flex items-center gap-2 px-4 py-2 rounded-lg">
+                {loading ? (
+                  <>
+                    <Loader2Icon className="size-4 animate-spin" />
+                    <span>Generating...</span>
+                  </>
+                ) : (
+                  <>
+                    Generate
+                    <ArrowRightIcon className="size-4" />
+                  </>
+                )}
+              </button>
+            </div>
           </div>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          {tones.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTone(t)}
+              className={`px-4 py-1.5 rounded-full text-sm transition-all border ${tone === t
+                  ? "bg-red-500 border-red-500 text-white"
+                  : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
+                }`}
+            >
+              {t}
+            </button>
+          ))}
         </div>
       </div>
 
