@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react"
-import { dummyGenerationData } from "../assets/assets"
-import { ArrowRightIcon, HistoryIcon, Loader2Icon, Wand2Icon } from "lucide-react"
+import {  useEffect, useState } from "react"
+import { dummyGenerationData, PLATFORMS } from "../assets/assets"
+import { AlertCircleIcon, ArrowRightIcon, CalendarIcon, CheckCircleIcon, ClockIcon, HistoryIcon, Loader2Icon, TimerIcon, Wand2Icon, XIcon } from "lucide-react"
 
 const AIComposer = () => {
   const [prompt, setPrompt] = useState<string>('')
   const [tone, setTone] = useState<string>('Professional')
   const [generateImage, setGenerateImage] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [generations, setGenerations] = useState<any[]>([])
 
   //Scheduling State
@@ -16,6 +18,7 @@ const AIComposer = () => {
   const [scheduledDate, setScheduledDate] = useState<string>("");
   const [scheduledTime, setScheduledTime] = useState<string>("");
   const [scheduling, setScheduling] = useState<boolean>(false);
+
 
   const fetchGenerations = async () => {
     setGenerations(dummyGenerationData)
@@ -32,6 +35,33 @@ const AIComposer = () => {
     }, 2000)
   }
 
+  const handleSchedule = async () => {
+  setError("");
+  setSuccess("");
+
+  if (selectedPlatforms.length === 0) {
+    setError("Please select at least one social media platform.");
+    return;
+  }
+
+  if (!scheduledDate || !scheduledTime) {
+    setError("Please select both date and time.");
+    return;
+  }
+
+  setScheduling(true);
+
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    setSuccess("Your post has been scheduled successfully!");
+  } catch (error) {
+    setError("Something went wrong. Please try again.");
+    console.log(error)
+  } finally {
+    setScheduling(false);
+  }
+};
 
   const tones = ["Professional", "Creative", "Funny", "Excited", "Casual", "Friendly", "Formal", "Humorous", "Inspirational", "Persuasive", "Empathetic", "Optimistic", "Confident"]
 
@@ -176,6 +206,118 @@ const AIComposer = () => {
       </div>
 
       {/* Scheduler Modal */}
+      {activeScheduler && (
+        <div className="fixed inset-0 min-h-screen z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[90vh]">
+
+            <div className="flex items-center justify-between px-8 py-4 border-b border-slate-100 bg-slate-50/30">
+              <h3 className="text-slate-900 font-semibold">Schedule Generation</h3>
+
+              <button
+                onClick={() => setActiveScheduler(null)}
+                className="p-2 rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+              >
+                <XIcon className="size-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-8 space-y-4">
+              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
+                <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">
+                  {activeScheduler.prompt}
+                </p>
+              </div>
+
+              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
+                <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">
+                  {activeScheduler.content}
+                  {activeScheduler.mediaUrl && (<img src={activeScheduler.mediaUrl} alt="Generated media" className="w-full aspect-video object-cover rounded-xl border border-slate-200 shadow-sm" />)}
+                </p>
+              </div>
+            </div>
+
+
+
+            <div className="p-8 bg-slate-50/50 border-t border-slate-50 space-y-8">
+              {/* Options for scheduling */}
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-xs text-slate-600 uppercase tracking-widest mb-4">Select Channels</label>
+                  <div className="flex flex-wrap gap-2">
+                    {PLATFORMS.map((p) => {
+                      const active = selectedPlatforms.includes(p.id);
+                      return (
+                        <button
+                          key={p.id}
+                          onClick={() =>
+                            setSelectedPlatforms((prev) =>
+                              prev.includes(p.id)
+                                ? prev.filter((x) => x !== p.id)
+                                : [...prev, p.id]
+                            )
+                          }
+                          className={`p-2.5 rounded-md border text-xs ${active ? "bg-red-500 text-white border-red-500" : "bg-white text-slate-600 border-slate-200 hover:border-slate-300"}`}
+                        >
+                          <p.icon className="size-4.5" />
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+                {/* Validation Messages */}
+                {error && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-sm">
+                    <AlertCircleIcon className="size-4 shrink-0" />
+                    <p>{error}</p>
+                  </div>
+                )}
+
+                {success && (
+                  <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-sm">
+                    <CheckCircleIcon className="size-4 shrink-0" />
+                    <p>{success}</p>
+                  </div>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+                  {/* Date Picker */}
+                  <div className="relative">
+                    <CalendarIcon className="size-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+
+                    <input
+                      type="date"
+                      required
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm outline-none transition-all focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-50"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Time Picker */}
+                  <div className="relative">
+                    <ClockIcon className="size-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+
+                    <input
+                      type="time"
+                      required
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 text-sm outline-none transition-all focus:bg-white focus:border-red-400 focus:ring-4 focus:ring-red-50"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                    />
+                  </div>
+
+                </div>
+
+              </div>
+              <button onClick={handleSchedule} className="w-full flex items-center justify-center gap-2 py-3 rounded-md bg-slate-200 text-slate-700 hover:bg-red-500 hover:text-white transition">
+                {scheduling ? <Loader2Icon className="size-4 animate-spin" /> : <TimerIcon className="size-4" />}
+                Schedule Post
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   )
 }
