@@ -147,7 +147,7 @@ const Scheduler = () => {
 
           {/* Header */}
           <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100">
-            <CalendarDaysIcon className="size-4 text-slate-500" />
+            <CalendarDaysIcon className="size-4 text-yellow-500" />
 
             <h3 className="text-sm font-semibold text-slate-800">
               Upcoming

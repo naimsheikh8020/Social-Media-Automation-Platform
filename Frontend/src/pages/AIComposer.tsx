@@ -1,7 +1,92 @@
+import { useEffect, useState } from "react"
+import { dummyGenerationData } from "../assets/assets"
 
 const AIComposer = () => {
+  const [prompt, setPrompt] = useState<string>('')
+  const [tone, setTone] = useState<string>('Professional')
+  const [generateImage, setGenerateImage] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [generations, setGenerations] = useState<any[]>([])
+
+  //Scheduling State
+  // const [activeScheduler, setActiveScheduler] = useState<any>(null)
+  const [activeScheduler, setActiveScheduler] = useState<any>(null);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [scheduledDate, setScheduledDate] = useState<string>("");
+  const [scheduledTime, setScheduledTime] = useState<string>("");
+  const [scheduling, setScheduling] = useState<boolean>(false);
+
+  const fetchGenerations = async () => {
+    setGenerations(dummyGenerationData)
+  }
+
+  useEffect(() => {
+    fetchGenerations()
+  }, [])
+
+  const tones = ["Professional", "Creative", "Funny", "Excited", "Casual", "Friendly", "Formal", "Humorous", "Inspirational", "Persuasive", "Empathetic", "Optimistic", "Confident"]
+
   return (
-    <div>AIComposer</div>
+    <div className="max-w-4xl mx-auto space-y-12 pb-20 animate-in fade-in duration-700">
+      {/* Input Section */}
+
+      <div className="max-w-3xl mx-auto mt-20 space-y-8">
+
+        {/* Heading */}
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-slate-800 tracking-tight">
+            What should we create today?
+          </h1>
+          <p className="text-sm text-slate-400">
+            Turn your ideas into engaging social media content with AI.
+          </p>
+        </div>
+
+        {/* Prompt Box */}
+        <div className="relative group">
+          <textarea
+            placeholder="Share your idea... (e.g. A post about the launch of our new eco-friendly coffee beans)"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            rows={5}
+            className="w-full resize-none rounded-2xl border border-slate-200 bg-white px-5 py-5 pb-16 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition-all duration-200 focus:border-red-300 focus:ring-4 focus:ring-red-50 shadow-sm"
+          />
+
+          {/* Bottom Toolbar */}
+          <div className="absolute bottom-4 left-5 right-5 flex items-center justify-between">
+
+            <span className="text-xs text-slate-400">
+              Describe your post idea
+            </span>
+
+            {/* AI Image Toggle */}
+            <button
+              type="button"
+              onClick={() => setGenerateImage(!generateImage)}
+              aria-pressed={generateImage}
+              className="flex items-center gap-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              <span>AI Image</span>
+
+              <div
+                className={`relative inline-flex h-5 w-9 shrink-0 rounded-full transition-colors duration-200 ${generateImage ? "bg-red-500" : "bg-slate-200"
+                  }`}
+              >
+                <span
+                  className={`pointer-events-none absolute left-0.5 top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${generateImage ? "translate-x-4" : "translate-x-0"
+                    }`}
+                />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+      {/* Ai Generation Post */}
+
+      {/* Scheduler Modal */}
+    </div>
   )
 }
 
