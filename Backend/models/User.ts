@@ -1,4 +1,5 @@
-import mongoose, { Schema } from "mongoose";
+// models/User.ts
+import mongoose, { Schema, InferSchemaType } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -9,38 +10,17 @@ const userSchema = new Schema(
       lowercase: true,
       trim: true,
       index: true,
-      match: [
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        "Please provide a valid email address",
-      ],
+      maxlength: 254,
+      match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please provide a valid email address"],
     },
-
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters long"],
-      select: false,
-    },
-
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      trim: true,
-      maxlength: [100, "Name cannot exceed 100 characters"],
-    },
-
-    zernioProfileId: {
-      type: String,
-      trim: true,
-      default: null,
-    },
+    password: { type: String, required: [true, "Password is required"], select: false },
+    name: { type: String, required: [true, "Name is required"], trim: true, maxlength: 100 },
+    zernioProfileId: { type: String, trim: true, default: null },
   },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
+  { timestamps: true, versionKey: false },
 );
 
-const User = mongoose.model("User", userSchema);
+export type UserDoc = InferSchemaType<typeof userSchema> & { _id: mongoose.Types.ObjectId };
 
+const User = mongoose.model("User", userSchema);
 export default User;
