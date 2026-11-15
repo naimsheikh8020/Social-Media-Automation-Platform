@@ -36,6 +36,11 @@ export const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => 
     statusCode = 400;
     message = "Invalid JSON request body";
     code = "INVALID_JSON";
+  } else if (err.type === "entity.too.large") {
+    // 👇 ADDED: DoS Protection against massive payloads
+    statusCode = 413;
+    message = "Request body is too large";
+    code = "PAYLOAD_TOO_LARGE";
   }
 
   const meta = {
