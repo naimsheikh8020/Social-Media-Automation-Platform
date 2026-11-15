@@ -1,36 +1,22 @@
+
 import "dotenv/config";
-import express, { Request, Response } from "express";
-import cors from "cors";
+
+import app from "./app.js";
 import { connectDB } from "./config/db.js";
 
-const app = express();
+const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-
-const port = process.env.PORT || 3000;
-
-app.get("/", (_req: Request, res: Response) => {
-  res.send("Server is Live!");
-});
-
-// Start server
-const startServer = async () => {
+async function startServer() {
   try {
-    // Connect MongoDB first
     await connectDB();
 
-    console.log("Database connected successfully!");
-
-    // Start Express after successful database connection
-    app.listen(port, () => {
-      console.log(`Server is running at http://localhost:${port}`);
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error);
+    console.error("Server startup failed:", error);
     process.exit(1);
   }
-};
+}
 
 startServer();
