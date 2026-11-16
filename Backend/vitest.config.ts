@@ -6,13 +6,17 @@ dotenv.config();
 
 export default defineConfig({
   test: {
-    env: { NODE_ENV: "test" }, 
-
+    env: { NODE_ENV: "test" },
     setupFiles: ["./tests/setup.ts"],
     environment: "node",
     disableConsoleIntercept: true,
-
-    testTimeout: 120000, // 2 minutes for tests to run
-    hookTimeout: 120000, // 2 minutes for setup.ts (beforeAll) to finish downloading
+    testTimeout: 120000,
+    hookTimeout: 120000,
+    exclude: ["**/node_modules/**", "**/dist/**"],
+    
+    // 👇 Vitest 4 Fix: Use maxWorkers instead of poolOptions
+    pool: "forks",
+    maxWorkers: 1,
+    fileParallelism: false, 
   },
 });

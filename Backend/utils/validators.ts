@@ -20,3 +20,22 @@ export const loginSchema = z.object({
   email,
   password: z.string().min(1).max(128),
 });
+
+export const addAccountSchema = z.object({
+  platform: z.enum(
+    [
+      "facebook",
+      "instagram",
+      "twitter",
+      "linkedin",
+      "tiktok",
+      "facebook_page",
+      "instagram_business",
+      "linkedin_page",
+    ],
+    {
+      // 👇 In Zod v4, use "error" instead of "errorMap"
+      error: "Invalid platform. Please choose a supported social network.",
+    }
+  ),
+});
