@@ -1,22 +1,35 @@
+// services/zernio.service.ts
 import zernio from "../config/zernio.js";
 import User from "../models/User.js";
 import { Account } from "../models/Account.js";
 import { AppError } from "../utils/AppError.js";
 
+// Prevent duplicate provisioning in the same Node.js process
 const profilePromises = new Map<string, Promise<string>>();
 
 // ─────────────────────────────────────────────────────────────
-// 1. Profile Management
+// 1. Get or Create Zernio Profile
 // ─────────────────────────────────────────────────────────────
-export const getOrCreateZernioProfile = async (user: any): Promise<string> => {
-  const userId = user._id?.toString();
-  if (!userId) throw new AppError("Invalid user", 400, "INVALID_USER");
+export const getOrCreateZernioProfile = async (
+  userId: string,
+  existingProfileId?: string | null
+): Promise<string> => {
+  if (!userId) {
+    throw new AppError("Invalid user", 400, "INVALID_USER");
+  }
 
-  if (user.zernioProfileId) return user.zernioProfileId;
+  // FAST PATH: If we already saved the ID in our DB, return immediately
+  if (existingProfileId) {
+    return existingProfileId;
+  }
 
+  // RACE CONDITION CHECK
   const existingPromise = profilePromises.get(userId);
-  if (existingPromise) return existingPromise;
+  if (existingPromise) {
+    return existingPromise;
+  }
 
+  // START PROVISIONING
   const promise = (async (): Promise<string> => {
     try {
       const profileName = `workspace-${userId}`;
@@ -61,79 +74,101 @@ export const getOrCreateZernioProfile = async (user: any): Promise<string> => {
 };
 
 // ─────────────────────────────────────────────────────────────
-// 2. OAuth URL Generation
+// 2. Get OAuth Connect URL
 // ─────────────────────────────────────────────────────────────
 export const getConnectUrl = async (
   platform: string,
   profileId: string,
   redirectUri: string
-) => {
-  const result = await zernio.connect.getConnectUrl({
-    path: { platform: platform as any },
-    query: { profileId, redirect_uri: redirectUri },
-  });
+): Promise<string> => {
+  try {
+    const result = await zernio.connect.getConnectUrl({
+      path: { platform: platform as any },
+      query: { profileId, redirect_uri: redirectUri },
+    });
 
-  const data = result.data as any;
-  const authUrl = data?.authUrl || data?.url;
+    const data = result.data as any;
+    const authUrl = data?.authUrl || data?.url;
 
-  if (!authUrl) {
-    throw new AppError(
-      `Zernio returned no auth URL: ${JSON.stringify(data)}`,
-      500,
-      "AUTH_URL_ERROR"
-    );
+    if (!authUrl) {
+      throw new AppError(`Zernio returned no auth URL: ${JSON.stringify(data)}`, 500, "AUTH_URL_ERROR");
+    }
+
+    return authUrl;
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(`Failed to get connect URL: ${error.message}`, 500, "ZERNIO_CONNECT_ERROR");
   }
-
-  return authUrl;
 };
 
 // ─────────────────────────────────────────────────────────────
-// 3. Sync Accounts
+// 3. Sync Accounts (List from Zernio)
 // ─────────────────────────────────────────────────────────────
 export const syncZernioAccounts = async (userId: string, profileId: string) => {
-  // 1. Fetch from Zernio
-  const result = await zernio.accounts.listAccounts({ query: { profileId } });
-  const data = result.data as any;
-  const zernioAccounts: any[] = Array.isArray(data) ? data : data?.accounts || data?.data || [];
+  try {
+    // 1. Fetch from Zernio
+    const result = await zernio.accounts.listAccounts({ query: { profileId } });
+    const data = result.data as any;
+    const zernioAccounts: any[] = Array.isArray(data) ? data : data?.accounts || data?.data || [];
 
-  // 2. Prepare data
-  const validAccounts = zernioAccounts
-    .filter((account) => account?._id || account?.id)
-    .map((account) => ({
-      id: String(account._id || account.id),
-      platform: account.platform,
-      handle: account.username || account.name || "Unknown",
-      avatarUrl: account.avatarUrl || null,
-    }));
+    // 2. Prepare data
+    const validAccounts = zernioAccounts
+      .filter((account) => account?._id || account?.id)
+      .map((account) => ({
+        id: String(account._id || account.id),
+        platform: account.platform,
+        handle: account.username || account.name || "Unknown",
+        avatarUrl: account.avatarUrl || null,
+      }));
 
-  const accountIds = validAccounts.map((a) => a.id);
+    const accountIds = validAccounts.map((a) => a.id);
 
-  // 3. Bulk Upsert
-  if (validAccounts.length > 0) {
-    const operations = validAccounts.map((account) => ({
-      updateOne: {
-        filter: { user: userId, zernioAccountId: account.id },
-        update: {
-          $set: {
-            platform: account.platform,
-            handle: account.handle,
-            avatarUrl: account.avatarUrl,
-            status: "connected",
+    // 3. Bulk Upsert
+    if (validAccounts.length > 0) {
+      const operations = validAccounts.map((account) => ({
+        updateOne: {
+          filter: { user: userId, zernioAccountId: account.id },
+          update: {
+            $set: {
+              platform: account.platform,
+              handle: account.handle,
+              avatarUrl: account.avatarUrl,
+              status: "connected",
+            },
+            $setOnInsert: { user: userId, zernioAccountId: account.id },
           },
-          $setOnInsert: { user: userId, zernioAccountId: account.id },
+          upsert: true,
         },
-        upsert: true,
-      },
-    }));
-    await Account.bulkWrite(operations, { ordered: false });
+      }));
+      await Account.bulkWrite(operations, { ordered: false });
+    }
+
+    // 4. Mark disconnected accounts
+    await Account.updateMany(
+      { user: userId, status: "connected", zernioAccountId: { $nin: accountIds } },
+      { $set: { status: "disconnected" } }
+    );
+
+    // 5. Return updated list
+    return await Account.find({ user: userId }).sort({ updatedAt: -1 });
+  } catch (error: any) {
+    if (error instanceof AppError) throw error;
+    throw new AppError(`Failed to sync accounts: ${error.message}`, 500, "ZERNIO_SYNC_ERROR");
   }
+};
 
-  // 4. Mark disconnected accounts
-  await Account.updateMany(
-    { user: userId, status: "connected", zernioAccountId: { $nin: accountIds } },
-    { $set: { status: "disconnected" } }
-  );
-
-  // 5. Return updated list
-  return await Account.find({ user: userId }).sort({ updatedAt: -1 });
+// ─────────────────────────────────────────────────────────────
+// 4. Delete Account from Zernio
+// ─────────────────────────────────────────────────────────────
+export const deleteZernioAccount = async (zernioAccountId: string): Promise<void> => {
+  try {
+    await zernio.accounts.deleteAccount({
+      path: { accountId: zernioAccountId }
+    });
+  } catch (error: any) {
+    // Ignore 404 Not Found (it means it was already deleted on Zernio's end)
+    if (error.statusCode !== 404) {
+      throw new AppError(`Zernio Delete Error: ${error.message}`, 500, "ZERNIO_DELETE_ERROR");
+    }
+  }
 };
