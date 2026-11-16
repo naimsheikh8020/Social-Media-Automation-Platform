@@ -10,6 +10,7 @@ import { authRouter } from "./routes/auth.route.js";
 import { webhookRouter } from "./routes/webhook.route.js";
 import { socialAuthRouter } from "./routes/socialAuth.route.js";
 import { accountRouter } from "./routes/account.routes.js";
+import { postRouter } from "./routes/post.route.js";
 
 const app = express();
 
@@ -33,6 +34,8 @@ app.use("/api/auth", authRouter);
 app.use("/api/webhooks", webhookRouter); 
 app.use("/api/oauth", socialAuthRouter);
 app.use("/api/accounts", accountRouter);
+app.use("/api/posts", postRouter); 
+
 
 
 

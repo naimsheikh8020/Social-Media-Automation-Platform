@@ -34,12 +34,18 @@ const generationSchema = new Schema(
       type: String, 
       default: "professional" 
     },
+     chat: { 
+      type: Schema.Types.ObjectId, 
+      ref: "Chat", 
+      required: true, 
+      index: true 
+    },
 
     // 🚦 Status (Crucial for the dashboard UI)
     status: {
       type: String,
-      enum: ["draft", "scheduled", "published", "failed"],
-      default: "draft",
+      enum: ["draft", "generating", "scheduled", "published", "failed"],
+      default: "generating",
       index: true,
     },
 

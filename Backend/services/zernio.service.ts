@@ -172,3 +172,28 @@ export const deleteZernioAccount = async (zernioAccountId: string): Promise<void
     }
   }
 };
+
+export const schedulePost = async (data: {
+  content: string;
+  mediaUrl: string | null;
+  scheduledFor: string;
+  timezone: string;
+  platforms: { platform: string; accountId: string }[];
+}) => {
+  try {
+    const result = await zernio.posts.createPost({
+      body: {
+        content: data.content,
+        scheduledFor: data.scheduledFor,
+        timezone: data.timezone,
+        platforms: data.platforms,
+        // Add media if it exists
+        ...(data.mediaUrl ? { mediaItems: [{ url: data.mediaUrl, type: "image" }] } : {}),
+      },
+    });
+
+    return result.data.post;
+  } catch (error: any) {
+    throw new AppError(`Zernio Schedule Error: ${error.message}`, 500, "ZERNIO_SCHEDULE_ERROR");
+  }
+};
