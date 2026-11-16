@@ -8,6 +8,7 @@ import { notFound } from "./middleware/notFound.js";
 import { globalErrorHandler } from "./middleware/error.middleware.js";
 import { authRouter } from "./routes/auth.route.js";
 import { webhookRouter } from "./routes/webhook.route.js";
+import { socialAuthRouter } from "./routes/socialAuth.route.js";
 
 const app = express();
 
@@ -28,7 +29,8 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/auth", authRouter);
-app.use("/api/webhooks", webhookRouter); // 👈 ADD THIS
+app.use("/api/webhooks", webhookRouter); 
+app.use("/api/oauth", socialAuthRouter);
 
 
 app.use(notFound);
