@@ -14,7 +14,7 @@ export const authConfig = {
   accessTokenTtl: (process.env.JWT_ACCESS_TTL ?? "15m") as SignOptions["expiresIn"],
   refreshTokenTtlMs: 7 * 24 * 60 * 60 * 1000,
   maxSessionsPerUser: 10,
-  bcryptRounds: 12,
+  bcryptRounds: 10,
   cookieName: "refreshToken",
   cookiePath: "/api/auth",
 } as const;

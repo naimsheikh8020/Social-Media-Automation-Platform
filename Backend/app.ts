@@ -11,6 +11,7 @@ import { webhookRouter } from "./routes/webhook.route.js";
 import { socialAuthRouter } from "./routes/socialAuth.route.js";
 import { accountRouter } from "./routes/account.routes.js";
 import { postRouter } from "./routes/post.route.js";
+import { activityRouter } from "./routes/activity.route.js";
 
 const app = express();
 
@@ -26,17 +27,22 @@ if (origins.length > 0) {
 app.use(cookieParser());
 
 app.get("/", (_req, res) => {
-  res.status(200).json({ success: true, status: "success", message: "Server is live!", data: null });
+  res
+    .status(200)
+    .json({
+      success: true,
+      status: "success",
+      message: "Server is live!",
+      data: null,
+    });
 });
 
 app.use("/api/auth", authRouter);
-app.use("/api/webhooks", webhookRouter); 
+app.use("/api/webhooks", webhookRouter);
 app.use("/api/oauth", socialAuthRouter);
 app.use("/api/accounts", accountRouter);
-app.use("/api/posts", postRouter); 
-
-
-
+app.use("/api/posts", postRouter);
+app.use("/api/activity", activityRouter);
 
 app.use(notFound);
 app.use(globalErrorHandler);
