@@ -4,24 +4,22 @@ import { logger } from "../utils/logger.js";
 
 export const reconcileStuckSchedules = async () => {
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-  
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+  // 1. Fail posts stuck for more than 1 hour
+  await Post.updateMany(
+    { status: "scheduling", createdAt: { $lte: oneHourAgo } },
+    { $set: { status: "failed", errorMessage: "Timed out after 1 hour" } }
+  );
+
+  // 2. Log posts stuck for 10-60 minutes
   const stuckPosts = await Post.find({
     status: "scheduling",
-    createdAt: { $lte: tenMinutesAgo },
+    createdAt: { $lte: tenMinutesAgo, $gt: oneHourAgo },
   });
 
-  if (stuckPosts.length === 0) return;
-
-  // 👇 Log the total count
-  logger.warn(`Reconciliation: Found ${stuckPosts.length} stuck posts.`);
-
   for (const post of stuckPosts) {
-    // 👇 Calculate how many minutes it has been stuck
     const ageInMinutes = Math.round((Date.now() - post.createdAt.getTime()) / 60000);
-
-    logger.error(`MANUAL CHECK NEEDED: Post ${post._id} stuck for ${ageInMinutes} minutes. Check Zernio dashboard.`, {
-      userId: post.user,
-      contentSnippet: post.content.substring(0, 30),
-    });
+    logger.warn(`RECONCILE: Post ${post._id} stuck for ${ageInMinutes}m.`);
   }
 };

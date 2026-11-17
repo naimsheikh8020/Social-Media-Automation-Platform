@@ -1,12 +1,12 @@
+// controllers/socialAuth.controller.ts
 import { Request, Response } from "express";
 import * as zernioService from "../services/zernio.service.js";
 import User from "../models/User.js";
 import { AppError } from "../utils/AppError.js";
 
 // GET /api/oauth/:platform
-export const generateAuthUrl = async (req: Request, res: Response) => {
+export const generateAuthUrl = async (req: Request, res: Response): Promise<void> => {
   try {
-    // 👇 The fix: Cast platform to a string
     const platform = req.params.platform as string;
     const userId = req.auth?.userId;
 
@@ -15,8 +15,11 @@ export const generateAuthUrl = async (req: Request, res: Response) => {
     const user = await User.findById(userId);
     if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
 
-    // 1. Get Profile ID
-    const profileId = await zernioService.getOrCreateZernioProfile(user);
+    // 1. Get Profile ID (Passing userId and existingProfileId)
+    const profileId = await zernioService.getOrCreateZernioProfile(
+      userId, 
+      user.zernioProfileId
+    );
 
     // 2. Build Redirect URL
     const frontendUrl = process.env.FRONTEND_URL;
@@ -26,7 +29,7 @@ export const generateAuthUrl = async (req: Request, res: Response) => {
     // 3. Get Auth URL
     const authUrl = await zernioService.getConnectUrl(platform, profileId, redirectUri);
 
-    return res.json({ success: true, url: authUrl });
+    res.json({ success: true, url: authUrl });
 
   } catch (error: any) {
     console.error("Error generating auth URL:", error?.message || error);
@@ -44,8 +47,11 @@ export const syncAccounts = async (req: Request, res: Response): Promise<void> =
     const user = await User.findById(userId);
     if (!user) throw new AppError("User not found", 404, "USER_NOT_FOUND");
 
-    // 1. Get Profile ID
-    const profileId = await zernioService.getOrCreateZernioProfile(user);
+    // 1. Get Profile ID (Passing userId and existingProfileId)
+    const profileId = await zernioService.getOrCreateZernioProfile(
+      userId, 
+      user.zernioProfileId
+    );
 
     // 2. Sync Accounts
     const accounts = await zernioService.syncZernioAccounts(userId, profileId);

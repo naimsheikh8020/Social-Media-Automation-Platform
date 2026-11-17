@@ -23,11 +23,8 @@ export const createSession = async (
   });
 };
 
-export const rotateSession = async (
-  oldRawToken: string,
-  meta: Meta,
-): Promise<Types.ObjectId> => {
-  const session = await Session.findOne({
+export const rotateSession = async (oldRawToken: string, meta: Meta): Promise<Types.ObjectId> => {
+  const session = await Session.findOneAndDelete({ // 👈 ATOMIC
     refreshTokenHash: hashRefreshToken(oldRawToken),
     expiresAt: { $gt: new Date() },
   });
@@ -37,7 +34,6 @@ export const rotateSession = async (
     throw new AppError("Invalid refresh token", 401, "INVALID_REFRESH_TOKEN");
   }
 
-  await Session.deleteOne({ _id: session._id });
   return session.user;
 };
 

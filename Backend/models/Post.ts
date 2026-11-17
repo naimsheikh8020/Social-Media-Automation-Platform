@@ -71,4 +71,10 @@ export type PostDoc = InferSchemaType<typeof postSchema> & {
   _id: mongoose.Types.ObjectId;
 };
 
+postSchema.index(
+  { user: 1, idempotencyKey: 1 },
+  { unique: true }
+);
+
+
 export const Post = mongoose.model("Post", postSchema);
