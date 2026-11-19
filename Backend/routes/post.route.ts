@@ -4,10 +4,15 @@ import * as postController from "../controllers/post.controller.js";
 import { requireAuth } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 import { generatePostSchema, schedulePostSchema, startChatSchema } from "../utils/validators.js";
+import { requireSubscription } from "../middleware/requireSubscription.js";
 
 export const postRouter = Router();
 
+// 1. Everyone must be logged in
 postRouter.use(requireAuth);
+
+// 2. Everyone must have an active subscription for AI features
+postRouter.use(requireSubscription);
 
 // Chat Management
 postRouter.post("/chat", validate(startChatSchema), postController.startChat);
@@ -20,4 +25,6 @@ postRouter.post("/generate", validate(generatePostSchema), postController.genera
 // History & Scheduling
 postRouter.get("/generations", postController.getGenerations);
 postRouter.post("/schedule", validate(schedulePostSchema), postController.schedulePost);
-postRouter.get("/", postController.getPosts);
+
+// Get Posts (Now protected too)
+postRouter.get("/", postController.getPosts); 
