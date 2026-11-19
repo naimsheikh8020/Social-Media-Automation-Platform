@@ -1,7 +1,6 @@
 
 import express, { Request, Response } from "express";
 import Stripe from "stripe";
-
 import stripe from "../config/stripe.js";
 import User from "../models/User.js";
 import { PLANS, PlanTier } from "../config/plans.js";
